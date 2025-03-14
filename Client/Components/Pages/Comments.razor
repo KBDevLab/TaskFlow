@@ -1,0 +1,53 @@
+@page "/comments/{TaskId:long}"
+@using TaskFlow.Shared.Models
+@using TaskFlow.Client.Services
+@inject ICommentsService CommentsService
+@inject NavigationManager Navigation
+
+
+<h3>Comments for Task @TaskId</h3>
+
+@if (comments == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (comments.Any())
+{
+    <ul>
+        @foreach (var comment in comments)
+        {
+            <li>
+                <strong>User ID: @comment.UserId</strong> - @comment.Content
+                <button @onclick="() => NavigateToCommentDetail(comment.Id)">View Detail</button>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No comments found for this task.</p>
+}
+
+<button @onclick="AddNewComment">Add New Comment</button>
+
+@code {
+    [Parameter]
+    public long TaskId { get; set; }
+
+    private IEnumerable<TaskFlow.Shared.Models.Comments> comments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        comments = await CommentsService.GetCommentsByTaskIdAsync(TaskId);
+    }
+
+    private void NavigateToCommentDetail(long commentId)
+    {
+        Navigation.NavigateTo($"/commentdetail/{commentId}");
+    }
+
+    private void AddNewComment()
+    {
+        Navigation.NavigateTo($"/commentdetail?taskId={TaskId}");
+    }
+}

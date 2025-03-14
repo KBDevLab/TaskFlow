@@ -1,0 +1,89 @@
+@page "/projects"
+@inject IJSRuntime JSRuntime
+@inject IProjectsService ProjectsService
+@inject NavigationManager Navigation
+@using TaskFlow.Shared.Models
+@using TaskFlow.Client.Services
+
+<h3>Projects</h3>
+
+@if (projects == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="AddNewProject">Add New Project</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>OwnerId</th>
+                <th>CreatedAt</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in projects)
+            {
+                <tr>
+                    <td>@project.Id</td>
+                    <td>@project.Name</td>
+                    <td>@project.Description</td>
+                    <td>@project.OwnerId</td>
+                    <td>@(project.CreatedAt?.ToString("d"))</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => ViewProject(project.Id)">View</button>
+                        <button class="btn btn-warning" @onclick="() => EditProject(project.Id)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteProject(project.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<TaskFlow.Shared.Models.Projects>? projects;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProjects();
+    }
+
+    private async Task LoadProjects()
+    {
+        projects = await ProjectsService.GetAllProjectsAsync();
+    }
+
+    private void AddNewProject()
+    {
+        Navigation.NavigateTo("/projectdetail/0");
+    }
+
+    private void ViewProject(long id)
+    {
+        Navigation.NavigateTo($"/projectdetail/{id}");
+    }
+
+    private void EditProject(long id)
+    {
+        Navigation.NavigateTo($"/projectdetail/{id}");
+    }
+
+    private async Task DeleteProject(long id)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this project?" });
+        if (confirmed)
+        {
+            var success = await ProjectsService.DeleteProjectAsync(id);
+            if (success)
+            {
+                await LoadProjects();
+            }
+        }
+    }
+}

@@ -1,0 +1,48 @@
+@page "/tasks/{Id:long}"
+@inject ITasksService TaskService
+@inject NavigationManager navigationManager
+@using TaskFlow.Shared.Models
+@using TaskFlow.Client.Services
+
+<h3>Task Details</h3>
+
+@if (task == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <p><strong>Title:</strong> @task.Title</p>
+        <p><strong>Description:</strong> @task.Description</p>
+        <p><strong>Priority:</strong> @task.Priority</p>
+        <p><strong>Due Date:</strong> @(task.DueDate?.ToString("d"))</p>
+        <p><strong>Created At:</strong> @(task.CreatedAt?.ToString("G"))</p>
+        <p><strong>Updated At:</strong> @(task.UpdatedAt?.ToString("G"))</p>
+    </div>
+
+    <button @onclick="GoBack">Back</button>
+    <button @onclick="EditTask">Edit</button>
+}
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+
+    private TaskFlow.Shared.Models.Tasks? task;
+
+    protected override async Task OnInitializedAsync()
+    {
+        task = await TaskService.GetTaskByIdAsync(Id);
+    }
+
+    private void GoBack()
+    {
+        navigationManager.NavigateTo("tasks");
+    }
+
+    private void EditTask()
+    {
+        navigationManager.NavigateTo($"tasks/edit/{Id}");
+    }
+}

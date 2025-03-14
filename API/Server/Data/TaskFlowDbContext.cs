@@ -26,7 +26,7 @@ public partial class TaskFlowDbContext : DbContext
     public virtual DbSet<Users> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Your-Connection_String");
+        => optionsBuilder.UseNpgsql("Host=localhost;Database=taskflow;Username=kb;Password=Babyboy1228!");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

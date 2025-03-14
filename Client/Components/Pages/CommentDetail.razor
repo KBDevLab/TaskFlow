@@ -1,0 +1,79 @@
+@page "/commentdetail/{Id:long?}"
+@page "/commentdetail"
+@using TaskFlow.Shared.Models
+@using TaskFlow.Client.Services
+@inject ICommentsService CommentsService
+@inject NavigationManager Navigation
+
+@if (string.IsNullOrEmpty(Id.ToString()))
+{
+    <h3>Add New Comment</h3>
+}
+else
+{
+    <h3>Comment Detail</h3>
+}
+
+<EditForm Model="@comment" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="content">Content:</label>
+        <InputText id="content" @bind-Value="comment.Content" />
+    </div>
+
+    <button type="submit">@(string.IsNullOrEmpty(Id.ToString()) ? "Add Comment" : "Update Comment")</button>
+    @if (!string.IsNullOrEmpty(Id.ToString()))
+    {
+        <button @onclick="DeleteComment">Delete Comment</button>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public long? Id { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public long TaskId { get; set; }
+
+    private TaskFlow.Shared.Models.Comments comment = new TaskFlow.Shared.Models.Comments();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            comment = await CommentsService.GetCommentByIdAsync(Id.Value);
+        }
+        else
+        {
+            comment.TaskId = TaskId;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Id.HasValue)
+        {
+            await CommentsService.UpdateCommentAsync(comment);
+        }
+        else
+        {
+            await CommentsService.AddCommentAsync(comment);
+        }
+        Navigation.NavigateTo($"/comments/{TaskId}");
+    }
+
+    private async Task DeleteComment()
+    {
+        if (Id.HasValue)
+        {
+            var success = await CommentsService.DeleteCommentAsync(Id.Value);
+            if (success)
+            {
+                Navigation.NavigateTo($"/comments/{TaskId}");
+            }
+        }
+    }
+}

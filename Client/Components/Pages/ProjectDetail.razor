@@ -1,0 +1,61 @@
+@page "/projectdetail/{Id:long}"
+@using System.Globalization
+@inject IProjectsService ProjectsService
+@inject NavigationManager Navigation
+@using TaskFlow.Shared.Models
+@using TaskFlow.Client.Services
+
+<h3>@(Id == 0 ? "Add New Project" : "Project Details")</h3>
+
+<EditForm Model="@project" OnValidSubmit="@HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" @bind-Value="project.Name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" @bind-Value="project.Description" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="ownerId">Owner ID</label>
+        <InputNumber id="ownerId" @bind-Value="project.OwnerId" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">@(Id == 0 ? "Create" : "Update")</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+
+    private TaskFlow.Shared.Models.Projects project = new TaskFlow.Shared.Models.Projects();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            project = await ProjectsService.GetProjectByIdAsync(Id);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (Id == 0)
+        {
+            await ProjectsService.AddProjectAsync(project);
+        }
+        else
+        {
+            await ProjectsService.UpdateProjectAsync(project);
+        }
+        Navigation.NavigateTo("/projects");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/projects");
+    }
+}

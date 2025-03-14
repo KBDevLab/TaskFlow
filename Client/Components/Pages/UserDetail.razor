@@ -1,0 +1,44 @@
+@page "/userdetail/{Id:long}"
+@inject IUsersService UserService
+@using TaskFlow.Shared.Models
+@using TaskFlow.Client.Services
+
+<h3>User Details</h3>
+
+@if (user == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <dl class="row">
+        <dt class="col-sm-3">ID</dt>
+        <dd class="col-sm-9">@user.Id</dd>
+        
+        <dt class="col-sm-3">Username</dt>
+        <dd class="col-sm-9">@user.Username</dd>
+        
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@user.Email</dd>
+        
+        <dt class="col-sm-3">Created At</dt>
+        <dd class="col-sm-9">@(user.CreatedAt?.ToString("g"))</dd>
+        
+        <dt class="col-sm-3">Updated At</dt>
+        <dd class="col-sm-9">@(user.UpdatedAt?.ToString("g"))</dd>
+    </dl>
+    
+    <a href="/users">Back to List</a>
+}
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+    
+    private TaskFlow.Shared.Models.Users? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserService.GetUserByIdAsync(Id);
+    }
+}
