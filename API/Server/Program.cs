@@ -14,6 +14,9 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("TaskFlowDb")));
 
+// builder.Services.AddControllers().AddJsonOptions(options =>
+//     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
+
 // Register repositories and services
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IUsersService, UsersService>();
